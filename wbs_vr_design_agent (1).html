@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WBS Virtual Learning Design Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy: #1c2b4a;
+  --navy-mid: #253660;
+  --navy-light: #344878;
+  --gold: #c8962a;
+  --gold-light: #e8b84b;
+  --cream: #f7f4ef;
+  --white: #ffffff;
+  --muted: #6b7280;
+  --border: #ddd8cf;
+  --radius: 12px;
+}
+body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--navy); min-height: 100vh; display: flex; flex-direction: column; }
+
+.header { background: var(--navy); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; height: 56px; flex-shrink: 0; border-bottom: 2px solid var(--gold); }
+.header-logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { width: 30px; height: 30px; background: var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: 'Lora', serif; font-weight: 600; font-size: 13px; color: var(--navy); }
+.header-title { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; color: var(--white); }
+.header-sub { font-size: 10px; color: var(--gold-light); font-weight: 300; letter-spacing: 1.5px; text-transform: uppercase; }
+.export-btn { background: transparent; border: 1px solid rgba(200,150,42,0.4); color: var(--gold-light); font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; }
+.export-btn:hover { background: rgba(200,150,42,0.12); border-color: var(--gold); }
+
+.welcome-banner { background: var(--navy-mid); border-bottom: 1px solid rgba(200,150,42,0.25); padding: 1rem 1.5rem; flex-shrink: 0; }
+.welcome-inner { max-width: 720px; margin: 0 auto; }
+.welcome-eyebrow { font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-light); margin-bottom: 5px; }
+.welcome-heading { font-family: 'Lora', serif; font-size: 17px; font-weight: 600; color: var(--white); margin-bottom: 5px; line-height: 1.3; }
+.welcome-text { font-size: 13px; color: rgba(255,255,255,0.72); line-height: 1.6; max-width: 620px; }
+.welcome-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { background: rgba(255,255,255,0.07); border: 1px solid rgba(200,150,42,0.3); color: rgba(255,255,255,0.8); font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+.chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--gold-light); flex-shrink: 0; }
+
+.starters-section { background: var(--cream); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; flex-shrink: 0; }
+.starters-inner { max-width: 720px; margin: 0 auto; }
+.starters-label { font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.starters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.starter-btn { background: var(--white); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; text-align: left; cursor: pointer; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.starter-btn:hover { border-color: var(--navy-light); background: #f0f3f8; }
+.starter-btn:active { transform: scale(0.98); }
+.starter-name { font-size: 12px; font-weight: 600; color: var(--navy); margin-bottom: 3px; display: flex; align-items: center; gap: 5px; }
+.starter-icon { width: 16px; height: 16px; background: var(--gold); border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.starter-icon svg { width: 10px; height: 10px; stroke: var(--navy); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.starter-desc { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+
+.chat-area { flex: 1; overflow-y: auto; padding: 1.25rem 1.5rem; scroll-behavior: smooth; }
+.messages-inner { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+
+.msg { display: flex; gap: 10px; align-items: flex-start; animation: msgIn 0.2s ease; }
+@keyframes msgIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.msg.user { flex-direction: row-reverse; }
+.avatar { width: 30px; height: 30px; border-radius: 7px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; margin-top: 2px; }
+.avatar.agent { background: var(--navy); color: var(--gold-light); font-family: 'Lora', serif; }
+.avatar.user { background: var(--gold); color: var(--navy); }
+.bubble { max-width: 78%; padding: 11px 15px; border-radius: var(--radius); font-size: 14px; line-height: 1.65; }
+.bubble.agent { background: var(--white); color: var(--navy); border: 1px solid var(--border); border-top-left-radius: 3px; }
+.bubble.user { background: var(--navy); color: var(--white); border-top-right-radius: 3px; }
+.bubble p { margin-bottom: 0.45rem; }
+.bubble p:last-child { margin-bottom: 0; }
+.bubble ul, .bubble ol { margin: 0.35rem 0 0.35rem 1.2rem; }
+.bubble li { margin-bottom: 3px; }
+.bubble strong { font-weight: 600; }
+
+.typing-indicator { display: flex; align-items: center; gap: 4px; padding: 12px 15px; }
+.typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bounce 1.2s infinite; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+
+.exit-card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; font-size: 13.5px; color: var(--navy); line-height: 1.7; max-width: 78%; }
+.exit-card-gold { height: 3px; background: var(--gold); border-radius: 2px; margin-bottom: 1rem; }
+.exit-card h3 { font-family: 'Lora', serif; font-size: 15px; font-weight: 600; color: var(--navy); margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+.exit-card a { color: var(--navy-light); }
+
+.input-area { background: var(--white); border-top: 1px solid var(--border); padding: 0.875rem 1.5rem; flex-shrink: 0; }
+.input-inner { max-width: 720px; margin: 0 auto; display: flex; gap: 8px; align-items: flex-end; }
+.input-wrap { flex: 1; background: var(--cream); border: 1.5px solid var(--border); border-radius: 10px; transition: border-color 0.15s; }
+.input-wrap:focus-within { border-color: var(--navy-light); }
+textarea { width: 100%; background: transparent; border: none; outline: none; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--navy); padding: 10px 12px; resize: none; min-height: 42px; max-height: 130px; line-height: 1.5; display: block; }
+textarea::placeholder { color: var(--muted); }
+.send-btn { width: 38px; height: 38px; background: var(--navy); border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s, transform 0.1s; }
+.send-btn:hover { background: var(--navy-light); }
+.send-btn:active { transform: scale(0.95); }
+.send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.send-btn svg { width: 15px; height: 15px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hint { font-size: 11px; color: var(--muted); text-align: center; margin-top: 5px; }
+
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(28,43,74,0.55); z-index: 100; align-items: center; justify-content: center; }
+.modal-bg.open { display: flex; }
+.modal { background: var(--white); border-radius: 14px; padding: 1.75rem; width: min(480px, 92vw); }
+.modal h2 { font-family: 'Lora', serif; font-size: 17px; font-weight: 600; margin-bottom: 1rem; color: var(--navy); }
+.modal textarea { background: var(--cream); border: 1px solid var(--border); border-radius: 8px; width: 100%; height: 200px; font-size: 12px; line-height: 1.6; padding: 10px 12px; color: var(--navy); font-family: monospace; margin-bottom: 1rem; resize: none; outline: none; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; align-items: center; }
+.btn-primary { background: var(--navy); color: white; border: none; border-radius: 8px; padding: 8px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+.btn-primary:hover { background: var(--navy-light); }
+.btn-ghost { background: transparent; color: var(--navy); border: 1px solid var(--border); border-radius: 8px; padding: 8px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+.btn-ghost:hover { background: var(--cream); }
+.copy-ok { font-size: 12px; color: #2a7a50; display: none; margin-right: auto; }
+.copy-ok.show { display: block; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <div class="logo-mark">WBS</div>
+    <div>
+      <div class="header-title">Virtual Learning Design Assistant</div>
+      <div class="header-sub">Teaching &amp; Learning Enhancement · Warwick Business School</div>
+    </div>
+  </div>
+  <button class="export-btn" onclick="openExport()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Export chat
+  </button>
+</header>
+
+<div class="welcome-banner">
+  <div class="welcome-inner">
+    <div class="welcome-eyebrow">Ideation · Co-design · VR &amp; Immersive Learning</div>
+    <div class="welcome-heading">Welcome to the Virtual Learning Design Assistant</div>
+    <div class="welcome-text">I'm here to help you explore and shape ideas for immersive, virtual, or AI-supported learning activities. My role is to support early-stage ideation and connect learning goals with engaging formats. I won't suggest specific software or tools — our expert team will support those choices later.</div>
+    <div class="welcome-chips">
+      <div class="chip"><div class="chip-dot"></div>Ideation only — no tech recommendations</div>
+      <div class="chip"><div class="chip-dot"></div>Max 15 headsets per session</div>
+      <div class="chip"><div class="chip-dot"></div>Type "exit" anytime for support links</div>
+      <div class="chip"><div class="chip-dot"></div>TLEnhancement@wbs.ac.uk</div>
+    </div>
+  </div>
+</div>
+
+<div class="starters-section" id="startersSection">
+  <div class="starters-inner">
+    <div class="starters-label">Where would you like to start?</div>
+    <div class="starters-grid">
+      <button class="starter-btn" onclick="pickStarter('New VR user: I\'ve never used VR before at all — where do I begin? What is VR?')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/></svg></span>
+          New VR user
+        </div>
+        <div class="starter-desc">I've never used VR before — where do I begin?</div>
+      </button>
+      <button class="starter-btn" onclick="pickStarter('Idea Legend: I\'ve got an idea for a VR activity — can you help me develop it?')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 3-2 5-3 6H8c-1-1-3-3-3-6a7 7 0 0 1 7-7z"/><path d="M9 21h6"/><path d="M12 17v4"/></svg></span>
+          Idea Legend
+        </div>
+        <div class="starter-desc">I've got a VR activity idea — help me develop it.</div>
+      </button>
+      <button class="starter-btn" onclick="pickStarter('Novice for teaching: I want to use VR in my teaching, but I don\'t know where to start.')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+          Novice for teaching
+        </div>
+        <div class="starter-desc">I want to use VR in my teaching but don't know where to start.</div>
+      </button>
+      <button class="starter-btn" onclick="pickStarter('Interactive investigator: Can we explore ways to make a session more immersive for students?')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+          Interactive investigator
+        </div>
+        <div class="starter-desc">Let's explore ways to make a session more immersive.</div>
+      </button>
+      <button class="starter-btn" onclick="pickStarter('Facilitator full-steam ahead: I\'m planning an activity for a business module or skill-building workshop.')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></span>
+          Facilitator full-steam ahead
+        </div>
+        <div class="starter-desc">I'm planning an activity for a business module or workshop.</div>
+      </button>
+      <button class="starter-btn" onclick="pickStarter('Case study hero: I have a case study I want to turn into a VR activity — how can I do this?')">
+        <div class="starter-name">
+          <span class="starter-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span>
+          Case study hero
+        </div>
+        <div class="starter-desc">I have a case study I want to turn into a VR activity.</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="chat-area" id="chatArea">
+  <div class="messages-inner" id="messages"></div>
+</div>
+
+<div class="input-area">
+  <div class="input-inner">
+    <div class="input-wrap">
+      <textarea id="userInput" placeholder="Or type your own message to get started…" rows="1"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <div class="hint">The assistant will guide you one step at a time · Type "exit" for support contacts</div>
+</div>
+
+<div class="modal-bg" id="exportModal">
+  <div class="modal">
+    <h2>Export conversation</h2>
+    <textarea id="exportText" readonly></textarea>
+    <div class="modal-actions">
+      <span class="copy-ok" id="copyOk">Copied to clipboard</span>
+      <button class="btn-ghost" onclick="closeExport()">Close</button>
+      <button class="btn-primary" onclick="copyExport()">Copy to clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SYSTEM_PROMPT = `You are a Virtual Learning Design Assistant for Warwick Business School (WBS), working as part of the Teaching and Learning Enhancement team. Your role is a learning design co-pilot to support academic and professional services staff in designing pedagogically grounded, feasible, and engaging VR, immersive, or AI-supported learning activities.
+
+CRITICAL RULES:
+- You are focused on pedagogical ideation only. You are NOT a technical assistant.
+- Do NOT provide platform, specific software, or tools advice. The ONLY piece of software or tool you can suggest (if prompted) is WondaVR.
+- Always respect the headset limitation: maximum of 15 headsets per session.
+- Do ONE step at a time. Do not provide a lengthy response — it can be overwhelming.
+- Do not combine steps or questions. Ask one thing at a time.
+- If someone provides a case study, do not process all the steps at the same time.
+- Always follow the conversation logic flow in order.
+- When a user picks a starter prompt (labelled e.g. "New VR user:", "Idea Legend:", "Case study hero:" etc.), acknowledge their starting point warmly and adapt your onboarding to match their context — but still follow the logic flow from the beginning.
+
+EXIT INSTRUCTION: If the user types "exit", respond with the full support information and close the session warmly.
+
+SUPPORT INFORMATION (share on "exit" or if explicitly requested):
+- Support email: TLEnhancement@wbs.ac.uk
+- TLC contacts: Ewout Buckens (Accounting), Maria Walker (Behavioural Science, Organisation and Work), Louise Considine (Entrepreneurship and Innovation, Finance), Diana Stefanescu (Information Systems Management and Analytics, Operations), Christina Palmer (Marketing), Natalia Dale (Strategy and International Business)
+- Experienced VR staff: Diana Stefanescu, John McCaughley, Dave Ashworth, Nick Riley, Michael Price
+- VR info: https://my.wbs.ac.uk/-/teaching/homepage/
+
+EMPLOYABILITY FRAMEWORK (PRACTICE) — share only if user asks for a reminder:
+Professionalism, Responsibility, Analytical Thinking, Critical Thinking, Teamwork, Innovation and Creativity, Communication, Emotional Awareness.
+
+GLOSSARY: wbsLive = online synchronous teaching. my.wbs = VLE. Scarman Road = Business School location.
+
+CONVERSATION LOGIC FLOW (one step at a time, in order):
+
+STEP 1 — ONBOARDING: Briefly clarify this is an ideation-only agent. Mention they can share case studies. Note the 15-headset maximum. Remind them to type "exit" for support. Invite them to share their role, session type, and confidence level.
+
+STEP 2 — USER CONTEXT (one question per turn): role, course/module/purpose, number of students, session type (lecture/seminar/workshop).
+
+STEP 3 — CONFIDENCE CHECK: Ask 1-5 confidence scale. Adapt your style: 1-2 = scaffold step by step; 3-4 = guided challenge; 5 = reflective partner.
+
+STEP 4 — EMPLOYABILITY FOCUS: Key skills being developed; PRACTICE framework aspects; how the activity addresses them.
+
+STEP 5 — IDEA GENERATION: Existing concept? Inspiration? Real-world business link? If stuck, ask about interests.
+
+STEP 6 — LEARNING INTENT: What should students know/do/feel? Links to readings or case studies?
+
+STEP 7 — VR AND OBSERVER PLANNING: What will headset users do? What will observers do? Room layout? Preferred format (narrative, gamified, visual)?
+
+STEP 8 — FEASIBILITY CHECK: Number of headsets (max 15)? Rotation/hybrid options? Pre/post content?
+
+STEP 9 — CURRICULUM PLACEMENT: Where in the learning sequence? Assessment links?
+
+STEP 10 — LEARNING JOURNEY OUTPUT: Outline the activity in phases (Setup, in-VR, observer tasks, post-session), each with duration, activity format, Laurillard learning type, Limina content format, and participant roles. Offer PDF export.
+
+STEP 10A — ACTIVITY ONBOARDING: Pre-session materials, introduction method, H&S/accessibility briefings, preparation tasks.
+
+STEP 10B — FACILITATOR NOTES: In-session instructions, headset rotation management, student behaviours to watch, observer guidance, success criteria.
+
+STEP 11 — REFLECTION AND RISK: Different student personas? Accessibility/inclusion? Non-VR alternative? Backup plan?
+
+Begin with Step 1. Keep it warm, brief, and welcoming. One step at a time.`;
+
+const history = [];
+let busy = false;
+
+function fmt(text) {
+  let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>');
+  const lines = h.split('\n');
+  const out = []; let list = '', lt = '';
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (!l) { if (list) { out.push('</' + lt + '>'); list = ''; } continue; }
+    const b = l.match(/^[-•]\s+(.*)/), n = l.match(/^\d+\.\s+(.*)/);
+    if (b) { if (lt!=='ul') { if (list) out.push('</'+lt+'>'); out.push('<ul>'); lt='ul'; list='ul'; } out.push('<li>'+b[1]+'</li>'); }
+    else if (n) { if (lt!=='ol') { if (list) out.push('</'+lt+'>'); out.push('<ol>'); lt='ol'; list='ol'; } out.push('<li>'+n[1]+'</li>'); }
+    else { if (list) { out.push('</'+lt+'>'); list=''; lt=''; } out.push('<p>'+l+'</p>'); }
+  }
+  if (list) out.push('</'+lt+'>');
+  return out.join('');
+}
+
+function addMsg(role, text, isExit) {
+  const wrap = document.getElementById('messages');
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  const av = document.createElement('div');
+  av.className = 'avatar ' + role;
+  av.textContent = role === 'agent' ? 'W' : 'You';
+  if (isExit) {
+    const card = document.createElement('div');
+    card.className = 'exit-card';
+    card.innerHTML = '<div class="exit-card-gold"></div><h3>Session complete — here\'s where to go next</h3>' + fmt(text);
+    el.appendChild(av); el.appendChild(card);
+  } else {
+    const b = document.createElement('div');
+    b.className = 'bubble ' + role;
+    b.innerHTML = fmt(text);
+    el.appendChild(av); el.appendChild(b);
+  }
+  wrap.appendChild(el);
+  scroll();
+}
+
+function showTyping() {
+  const wrap = document.getElementById('messages');
+  const el = document.createElement('div');
+  el.className = 'msg agent'; el.id = 'typing';
+  const av = document.createElement('div');
+  av.className = 'avatar agent'; av.textContent = 'W';
+  const b = document.createElement('div');
+  b.className = 'bubble agent';
+  b.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  el.appendChild(av); el.appendChild(b);
+  wrap.appendChild(el); scroll();
+}
+function hideTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+function scroll() { const a = document.getElementById('chatArea'); a.scrollTop = a.scrollHeight; }
+
+async function api(msgs) {
+  const r = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: SYSTEM_PROMPT, messages: msgs })
+  });
+  const d = await r.json();
+  return d.content.map(b => b.text || '').join('');
+}
+
+function hideStarters() {
+  const s = document.getElementById('startersSection');
+  if (s) { s.style.transition = 'opacity 0.3s'; s.style.opacity = '0'; setTimeout(() => s.style.display = 'none', 300); }
+}
+
+async function pickStarter(text) {
+  hideStarters();
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  busy = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+  try {
+    const reply = await api(history);
+    hideTyping();
+    addMsg('agent', reply);
+    history.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    hideTyping();
+    addMsg('agent', 'Something went wrong. Please try again or contact TLEnhancement@wbs.ac.uk');
+  }
+  busy = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+async function sendMessage() {
+  if (busy) return;
+  const inp = document.getElementById('userInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  inp.value = ''; inp.style.height = 'auto';
+  hideStarters();
+  addMsg('user', text);
+  history.push({ role: 'user', content: text });
+  busy = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+  try {
+    const reply = await api(history);
+    hideTyping();
+    const isExit = text.toLowerCase().trim() === 'exit';
+    addMsg('agent', reply, isExit);
+    history.push({ role: 'assistant', content: reply });
+  } catch(e) {
+    hideTyping();
+    addMsg('agent', 'Something went wrong. Please try again or contact TLEnhancement@wbs.ac.uk');
+  }
+  busy = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+function openExport() {
+  const lines = history.map(m => '[' + (m.role==='user'?'YOU':'ASSISTANT') + ']\n' + m.content).join('\n\n---\n\n');
+  document.getElementById('exportText').value = lines || '(No conversation yet)';
+  document.getElementById('exportModal').classList.add('open');
+  document.getElementById('copyOk').classList.remove('show');
+}
+function closeExport() { document.getElementById('exportModal').classList.remove('open'); }
+function copyExport() {
+  const ta = document.getElementById('exportText'); ta.select(); document.execCommand('copy');
+  document.getElementById('copyOk').classList.add('show');
+}
+
+document.getElementById('userInput').addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 130) + 'px';
+});
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+document.getElementById('exportModal').addEventListener('click', function(e) { if (e.target===this) closeExport(); });
+</script>
+</body>
+</html>
